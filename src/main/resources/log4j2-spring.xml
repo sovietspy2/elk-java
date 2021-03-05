@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Liquid Technologies Online Tools 1.0 (https://www.liquid-technologies.com) -->
+<Configuration status="WARN"
+               monitorInterval="30"
+               shutdownHook="disable">
+    <Properties>
+        <Property name="baseDir">logs</Property>
+        <Property name="applicationName">my-application</Property>
+        <Property name="LOG_PATTERN">
+            %d{yyyy-MM-dd HH:mm:ss.SSS} %5p ${hostName} --- [%15.15t] %-40.40c{1.} : %m%n%ex
+        </Property>
+    </Properties>
+    <Appenders>
+        <Console name="ConsoleAppender" target="SYSTEM_OUT" follow="true">
+            <PatternLayout pattern="${LOG_PATTERN}"/>
+        </Console>
+        <RollingFile
+                name="RollingFile"
+                fileName="applog.log"
+                filePattern="applog.%d{yyyy-MM-dd}-%i.log">
+            <PatternLayout pattern="%-5p|%d{ISO8601}{GMT}|%X{token}|%c{1}|%X{Principal}|%m%ex%n" />
+            <Policies>
+                <OnStartupTriggeringPolicy />
+                <SizeBasedTriggeringPolicy size="20 MB" />
+                <TimeBasedTriggeringPolicy />
+            </Policies>
+            <DefaultRolloverStrategy max="10">
+                <Delete basePath="${baseDir}">
+                    <IfFileName glob="${applicationName}.*.log">
+                        <IfAny>
+                            <IfAccumulatedFileSize exceeds="200 MB" />
+                            <IfAccumulatedFileCount exceeds="10" />
+                        </IfAny>
+                    </IfFileName>
+                </Delete>
+            </DefaultRolloverStrategy>
+            <RegexFilter regex=".*@ConfigurationProperties.*"
+                         onMatch="DENY"
+                         onMismatch="ACCEPT" />
+        </RollingFile>
+        <Gelf name="gelf"
+              host="tcp:localhost"
+              port="5000"
+              version="1.0"
+              extractStackTrace="true"
+              filterStackTrace="true"
+              mdcProfiling="true"
+              includeFullMdc="true"
+              maximumMessageSize="8192"
+              originHost="%host"
+              ignoreExceptions="true"
+        >
+            <Field name="timestamp"
+                   pattern="%d{dd MMM yyyy HH:mm:ss,SSS}" />
+            <Field name="level"
+                   pattern="%level" />
+            <Field name="simpleClassName"
+                   pattern="%C{1}" />
+            <Field name="className"
+                   pattern="%C" />
+            <Field name="server.simple"
+                   pattern="%host{simple}" />
+            <Field name="server.fqdn"
+                   pattern="%host{fqdn}" />
+            <Field name="application"
+                   literal="${applicationName}" />
+            <Field name="user"
+                   literal="%user" />
+            <Field name="duration"
+                   literal="%duration" />
+            <Field name="method"
+                   literal="%method" />
+        </Gelf>
+    </Appenders>
+    <Loggers>
+        <Root level="INFO">
+            <AppenderRef ref="RollingFile" />
+            <AppenderRef ref="gelf" />
+            <AppenderRef ref="ConsoleAppender" />
+        </Root>
+        <Logger name="org.springframework"
+                level="WARN" />
+        <Logger name="com.example.demo"
+                level="INFO" />
+    </Loggers>
+</Configuration>
