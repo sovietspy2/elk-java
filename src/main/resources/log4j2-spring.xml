@@ -3,6 +3,7 @@
 <Configuration status="WARN"
                monitorInterval="30"
                shutdownHook="disable">
+
     <Properties>
         <Property name="baseDir">logs</Property>
         <Property name="applicationName">my-application</Property>
@@ -70,6 +71,8 @@
                    literal="%duration" />
             <Field name="method"
                    literal="%method" />
+            <Field name="status"
+                   literal="%status" />
         </Gelf>
     </Appenders>
     <Loggers>
@@ -79,7 +82,7 @@
             <AppenderRef ref="ConsoleAppender" />
         </Root>
         <Logger name="org.springframework"
-                level="WARN" />
+                level="INFO" />
         <Logger name="com.example.demo"
                 level="INFO" />
     </Loggers>

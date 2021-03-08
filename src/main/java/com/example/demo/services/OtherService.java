@@ -1,6 +1,7 @@
 package com.example.demo.services;
 
 import com.example.demo.aspect.LogDuration;
+import com.example.demo.exception.CustomBusinessException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Component;
@@ -15,14 +16,15 @@ public class OtherService {
 
         try {
             if(Math.random() > 0.5){
-                throw new Exception("uh random exception");
+                throw new CustomBusinessException();
             }
+
+            logger.info("Finished other task");
+
         } catch (Exception e) {
-            logger.error(e.getMessage());
+            logger.error(e);
+            throw e;
         }
-
-        logger.info("Finished other task");
-
     }
 
 }
